@@ -228,10 +228,6 @@ let app = (function () {
                 };
 
             const comparaResposta = (idCorreto, idResposta ,e) => {
-                limite_tentativas--;
-                localStorage.setItem("limite_tentativas",limite_tentativas);
-                console.log(limite_tentativas);
-
                 if (idCorreto === idResposta) {
                     e.target.appendChild(document.getElementById(idResposta));
 
@@ -240,6 +236,11 @@ let app = (function () {
 
                     localStorage.setItem('resposta_correta',JSON.stringify(resposta_correta));
                 } else {
+                    limite_tentativas--;
+
+                    localStorage.setItem("limite_tentativas",limite_tentativas);
+                    console.log(limite_tentativas);
+                    
                     if(localStorage.getItem("limite_tentativas") === "0") {
                         document.getElementById("app").style.pointerEvents = "none"
                         document.getElementById("app").style.opacity = "0.4"
