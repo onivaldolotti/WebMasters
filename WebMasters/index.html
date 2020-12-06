@@ -10,10 +10,21 @@
 
 <body>
     <div id="app">
-        <div id="divAlternativas" tabindex="-1" alt="area onde estão listadas as alternativas do exercício"></div>
-        <div id="divResposta" tabindex="-1" alt="area onde esta listada a figura Resposta e a area para preenchimento da resposta">
-            <div id="divAlternativaCorreta" alt="area onde deve ser inserida a sua resposta"></div>
+
+        <div id="divTema">
+            <h3 id="h3">Tema claro/escuro</h3>
+            <input id="switch" type="checkbox">
+            <label for="switch">Toggle</label>
         </div>
+
+        <div id="divAtividade">
+            <div id="divAlternativas" tabindex="-1" alt="area onde estão listadas as alternativas do exercício"></div>
+            <div id="divResposta" tabindex="-1" alt="area onde esta listada a figura Resposta e a area para preenchimento da resposta">
+                <div id="divAlternativaCorreta" alt="area onde deve ser inserida a sua resposta"></div>
+            </div>
+        </div>
+
+
     </div>
     <script src="app.js"></script>
 </body>

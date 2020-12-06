@@ -58,14 +58,41 @@ let app = (function () {
     let divResposta           = document.getElementById('divResposta');
     let respostaSeleciondaComTeclado = '';
 
+    let html = document.querySelector("html");
+    let checkbox = document.getElementById('switch');
+
+    let getStyle = (element, style) => 
+        window
+            .getComputedStyle(element)
+            .getPropertyValue(style)
+
+    let initialColors = {
+        bg: getStyle(html, "--bg"),
+        textColor: getStyle(html, "--text-color"),
+        alternativaCorreta: getStyle(html, "--alternativa-correta")
+    }
+
+    let darkMode = {
+        bg: "#333",
+        textColor: "#FCFCFC",
+        alternativaCorreta: "#FCFCFC"
+    }
+
+    let transformKey = key => 
+        "--" + key.replace(/([A-Z])/, "-$1").toLowerCase()
+
+    let changeColors = (colors) => {
+        Object.keys(colors).map(key => 
+            html.style.setProperty(transformKey(key), colors[key]) 
+        );
+    }
+
     return {
 
         // Todos os listeners registrados que abrangem um escopo
         // maior do que a div #app,
         // deverão ser implementados aqui
         on: function () {
-
-
             /*
                 verifica se o aluno está reiniciando a página, se sim atualiza o valor do limite de tentivas de acordo com o localStorage,
                 se não cria a variavel no localStorage;
@@ -95,6 +122,20 @@ let app = (function () {
                     document.getElementById('divAlternativaCorreta').focus();
                 }
             });
+
+            // checkbox.addEventListener("change", ({target}) => {
+            //     target.checked ? changeColors(darkMode) : changeColors(initialColors);
+            // });
+
+            checkbox.addEventListener("change", ({target}) => {
+                if (target.checked) {
+                  changeColors(darkMode) ;
+                  localStorage.setItem('modo', JSON.stringify('darkMode'))
+                } else {
+                  changeColors(initialColors)
+                  localStorage.setItem('modo', JSON.stringify('initialColors'))
+                }
+              })
         },
 
         // Eventos registrados pela função "on",
@@ -181,10 +222,15 @@ let app = (function () {
                         respostaSeleciondaComTeclado = '';
 
                         comparaResposta(idCorreto, idResposta, e);
+                        
                     }
+
                 };
 
             const comparaResposta = (idCorreto, idResposta ,e) => {
+                limite_tentativas--;
+                localStorage.setItem("limite_tentativas",limite_tentativas);
+                console.log(limite_tentativas);
 
                 if (idCorreto === idResposta) {
                     e.target.appendChild(document.getElementById(idResposta));
@@ -192,20 +238,24 @@ let app = (function () {
                     alert('Resposta Correta');
                     resposta_correta.push(atividades.imagem[0]);
 
-                    localStorage.setItem('resposta_correta',resposta_correta);
+                    localStorage.setItem('resposta_correta',JSON.stringify(resposta_correta));
                 } else {
-                    limite_tentativas--;
-
-                    localStorage.setItem("limite_tentativas",limite_tentativas)
-                    console.log(limite_tentativas)
-
                     if(localStorage.getItem("limite_tentativas") === "0") {
                         document.getElementById("app").style.pointerEvents = "none"
                         document.getElementById("app").style.opacity = "0.4"
                         alert('Tentativas esgotadas');
                     }
                 }
+                this.relatorio(idResposta, atividades.imagem[0]);
             };
+
+            if (JSON.parse(localStorage.getItem('modo')) === "initialColors") {
+                checkbox.removeAttribute('checked')
+                changeColors(initialColors);
+              } else {
+                checkbox.setAttribute('checked', "")
+                changeColors(darkMode);
+              }
         },
 
         // Retornar array contendo as mensagens
@@ -213,8 +263,20 @@ let app = (function () {
         //  "Resposta do aluno:" + respostaAluno,
         //  "Resposta correta: " + resposta_correta
         // ]
-        relatorio: function () {
+        relatorio: function (idResposta, resposta_correta) {
+            let respostaAluno = atividades.alternativas.filter(item => {
+                return idResposta == item.id;
+            });
 
+            let respAluno = JSON.stringify(respostaAluno);
+            let respCorreta = JSON.stringify(resposta_correta);
+
+            let relatorioResposta = [
+                "Resposta do aluno:" + respAluno,
+                "Resposta correta: " + respCorreta
+            ]; 
+
+            console.log("relatório da resposta: " + relatorioResposta);
         },
 
         // Função que limpa o armazenamento local
