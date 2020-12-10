@@ -28,7 +28,7 @@ let app = (function () {
             {
                 "id": "3",
                 "src": "./images/galo.png",
-                "descricao_title": "Mostra um galo"
+                "descricao_title": "Mostra um galo",
             },
             {
                 "id": "4",
@@ -103,22 +103,41 @@ let app = (function () {
                 limite_tentativas = localStorage.getItem("limite_tentativas")
             }
 
+            /*
+                verifica se o aluno já concluiu o exercício, se sim atualiza a resposta e bloqueia o exercício
+            */
+            if(localStorage.getItem("resposta_correta") != null){
+                
+                let resposta = JSON.parse(localStorage.getItem("resposta_correta"))
+                document.getElementById("divAlternativaCorreta").appendChild(document.getElementById(resposta[0].id))
+                document.getElementById("app").style.pointerEvents = "none"
+                document.getElementById("app").style.opacity = "0.4"
+                alert('Você já concluiu esse exercício');
+
+            }
+
             /* verifica se o limite de tentivas ja foi alcaçado, se sim, bloqueia a tela */
             if(localStorage.getItem("limite_tentativas") === "0") {
                 document.getElementById("app").style.pointerEvents = "none"
                 document.getElementById("app").style.opacity = "0.4"
-                alert('Tentativas esgotadas');
+                alert('Você já esgotou todas as tentativas possíveis');
             }
 
             //trap tab index, travar o tab e o shift tab para que não saia da area do exercicio
             document.getElementById('divAlternativaCorreta').addEventListener('keydown',e => {
                 if (e.keyCode === 9) {
+
+                    e.preventDefault();
+
                     document.getElementById(atividades.alternativas[0].id).focus();
                 }
             });
 
             document.getElementById(atividades.alternativas[0].id).addEventListener('keydown',e => {
                 if(e.shiftKey && e.keyCode === 9) {
+
+                    e.preventDefault();
+
                     document.getElementById('divAlternativaCorreta').focus();
                 }
             });
@@ -230,21 +249,27 @@ let app = (function () {
             const comparaResposta = (idCorreto, idResposta ,e) => {
                 if (idCorreto === idResposta) {
                     e.target.appendChild(document.getElementById(idResposta));
+                    resposta_correta.push(atividades.imagem[0]);
+                    localStorage.setItem('resposta_correta',JSON.stringify(resposta_correta));
 
                     alert('Resposta Correta');
-                    resposta_correta.push(atividades.imagem[0]);
-
-                    localStorage.setItem('resposta_correta',JSON.stringify(resposta_correta));
+                    document.getElementById("app").style.pointerEvents = "none"
+                    document.getElementById("app").style.opacity = "0.4"
+                    
                 } else {
+
                     limite_tentativas--;
 
+                    document.getElementById(atividades.alternativas[0].id).focus();
+
                     localStorage.setItem("limite_tentativas",limite_tentativas);
-                    console.log(limite_tentativas);
-                    
+                                        
                     if(localStorage.getItem("limite_tentativas") === "0") {
                         document.getElementById("app").style.pointerEvents = "none"
                         document.getElementById("app").style.opacity = "0.4"
                         alert('Tentativas esgotadas');
+                    }else{
+                        alert('Resposta incorreta, você possui mais ' + limite_tentativas + ' tentativas');
                     }
                 }
                 this.relatorio(idResposta, atividades.imagem[0]);
